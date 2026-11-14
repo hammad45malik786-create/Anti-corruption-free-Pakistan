@@ -1,1 +1,0 @@
-# Anti-corruption-free-Pakistan
