@@ -634,7 +634,8 @@ def run_risk_engine(raw_df: pd.DataFrame) -> pd.DataFrame:
         
         # getattr ka istemal taake AttributeError na aaye
         repeat_val = getattr(row, "contractor_repeat_overrun_delays", 0)
-        repeat_triggered = repeat_val >= 2 and row._is_overrun_delay
+        is_overrun=getattr(row,"_is_overrun_delay" , False)
+        repeat_triggered = repeat_val >= 2 and is_overrun
         
         if delay_triggered or repeat_triggered:
             if delay_triggered and repeat_triggered:
