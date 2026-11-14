@@ -629,16 +629,20 @@ def run_risk_engine(raw_df: pd.DataFrame) -> pd.DataFrame:
                 f"of {row.district} contract value ({int(row.ctr_dist_projects)} projects)"
             )
 
-        # Rule E: Repeated cost overruns & severe delays
+# Rule E: Repeated cost overruns & severe delays
         delay_triggered = row.delay_ratio >= 1.50
-        repeat_triggered = row.contractor_repeat_overrun_delays >= 2 and row._is_overrun_delay
+        
+        # getattr ka istemal taake AttributeError na aaye
+        repeat_val = getattr(row, "contractor_repeat_overrun_delays", 0)
+        repeat_triggered = repeat_val >= 2 and row._is_overrun_delay
+        
         if delay_triggered or repeat_triggered:
             if delay_triggered and repeat_triggered:
                 pts += 22.0
                 tags.append("Repeated Overruns & Delays")
                 reasons.append(
                     f"Severe schedule delay ({row.delay_ratio:.2f}x planned duration) by repeat-overrun "
-                    f"contractor ({int(row.contractor_repeat_overrun_delays)} troubled contracts)"
+                    f"contractor ({int(repeat_val)} troubled contracts)"
                 )
             elif delay_triggered:
                 pts += 14.0
@@ -651,10 +655,13 @@ def run_risk_engine(raw_df: pd.DataFrame) -> pd.DataFrame:
                 pts += 14.0
                 tags.append("Repeated Contractor Overruns")
                 reasons.append(
-                    f"Contractor {row.contractor_id} has {int(row.contractor_repeat_overrun_delays)} "
+                    f"Contractor {row.contractor_id} has {int(repeat_val)} "
                     f"projects with simultaneous cost overruns and delays"
                 )
 
+
+
+        
         # Rule F: Many audit objections
         if row.audit_objections_count >= 6:
             pts += 22.0
